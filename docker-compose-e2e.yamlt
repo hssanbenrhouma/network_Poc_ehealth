@@ -36,10 +36,10 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca-providerorg
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.providerorg.medical.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4089fc00ea26332f13c6e1d960f6201b5d043fbcceb7ee87850bc70a5e49b6ea_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/597b8548e65ccccf3747596334ca5f449f129e0464d9b7444c45d47437bd1b96_sk
     ports:
       - "7054:7054"
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.providerorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/4089fc00ea26332f13c6e1d960f6201b5d043fbcceb7ee87850bc70a5e49b6ea_sk -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.providerorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/597b8548e65ccccf3747596334ca5f449f129e0464d9b7444c45d47437bd1b96_sk -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/providerorg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca_peerProviderOrg
@@ -53,10 +53,10 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca-pharmacyorg
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pharmacyorg.medical.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/5a741d6b17b870799fd843da906dd2940466d754f68ac9c704bf4c2127f32c2a_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8343eaadc29189d4b808be2c429f9e24caec5a36be8249d687ae57950f9e3c8e_sk
     ports:
       - "8054:7054"
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.pharmacyorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/5a741d6b17b870799fd843da906dd2940466d754f68ac9c704bf4c2127f32c2a_sk -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.pharmacyorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/8343eaadc29189d4b808be2c429f9e24caec5a36be8249d687ae57950f9e3c8e_sk -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/pharmacyorg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca_peerPharmacyOrg
@@ -70,10 +70,10 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca-hospitalorg
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospitalorg.medical.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8f810208b534014ade70c5daf6d7bb76e7f30936709f0b39f591920f592a5ce3_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/bf63ff62a85fc153864c0bea5a6d7e0346a7e475bee1f04e9cfdb5665c2b33fc_sk
     ports:
       - "9054:7054"
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.hospitalorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/8f810208b534014ade70c5daf6d7bb76e7f30936709f0b39f591920f592a5ce3_sk -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.hospitalorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/bf63ff62a85fc153864c0bea5a6d7e0346a7e475bee1f04e9cfdb5665c2b33fc_sk -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/hospitalorg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca_peerHospitalOrg
@@ -165,5 +165,44 @@ services:
     extends:
       file:  base/docker-compose-base.yaml
       service: peer1.regulatororg.medical.com
+    networks:
+      - medical
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.providerorg.medical.com:7051
+      - CORE_PEER_LOCALMSPID=ProviderOrgMSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/peers/peer0.providerorg.medical.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/peers/peer0.providerorg.medical.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/peers/peer0.providerorg.medical.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/users/Admin@providerorg.medical.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./setupChannel:/opt/gopath/src/github.com/hyperledger/fabric/peer/setupChannel/
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+        - ./../../fabric-chaincode-evm:/opt/gopath/src/github.com/hyperledger/fabric-chaincode-evm
+
+    depends_on:
+      - orderer.medical.com
+      - peer0.providerorg.medical.com
+      - peer1.providerorg.medical.com
+      - peer0.pharmacyorg.medical.com
+      - peer1.pharmacyorg.medical.com
+      - peer0.hospitalorg.medical.com
+      - peer1.hospitalorg.medical.com
+      - peer0.regulatororg.medical.com
+      - peer1.regulatororg.medical.com
     networks:
       - medical

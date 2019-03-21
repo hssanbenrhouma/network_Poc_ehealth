@@ -176,6 +176,9 @@ function networkUp () {
      export FABRIC_CFG_PATH=${PWD}
   fi
 
+sleep 15
+  # now run the end to end script
+  docker exec cli setupChannel/setupChannel.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start network"
     exit 1
@@ -260,7 +263,7 @@ function networkDown () {
 
   docker-compose -f $COMPOSE_FILE down --volumes
 
-  for PEER in peer0.providerorg.medical.com peer1.providerorg.medical.com peer0.pharmacyorg.medical.com peer1.pharmacyorg.medical.com peer0.hospitalorg.medical.com peer1.hospitalorg.medical.com peer0.regulatororg.medical.com peer1.regulatororg.medical.com; do
+  for PEER in peer0.providerorg.medical.com peer1.providerorg.medical.com peer0.pharmacyorg.medical.com peer1.pharmacyorg.medical.com peer0.hospitalorg.medical.com peer1.hospitalorg.medical.com peer0.regulatororg.medical.com peer1.regulatororg.medical.com cli; do
     # Remove any old containers and images for this peer
     CC_CONTAINERS=$(docker ps -a | grep dev-$PEER | awk '{print $1}')
     if [ -n "$CC_CONTAINERS" ] ; then
@@ -508,10 +511,10 @@ function generateChannelArtifacts() {
   fi
   echo
   echo "###################################################################"
-  echo "###  Generating channel configuration transaction  'channel.tx' ###"
+  echo "###  Generating channel configuration transaction  'medicalchannel.tx' ###"
   echo "###################################################################"
   set -x
-  configtxgen -profile $CHANNEL_PROFILE -outputCreateChannelTx ./channel-artifacts/channel.tx -channelID $CHANNEL_NAME
+  configtxgen -profile $CHANNEL_PROFILE -outputCreateChannelTx ./channel-artifacts/medicalchannel.tx -channelID $CHANNEL_NAME
   res=$?
   set +x
   if [ $res -ne 0 ]; then
@@ -604,7 +607,14 @@ function generateChannelConfigForNewOrg() {
 
 # channel name (overrides default 'testchainid')
 CHANNEL_NAME="medicalchannel"
+
+CLI_TIMEOUT=10
+# default for delay between commands
+CLI_DELAY=3
+# use golang as the default language for chaincode
+LANGUAGE=golang
 # use this as the default docker-compose yaml definition
+# another container before giving up
 COMPOSE_FILE=docker-compose-e2e.yaml
 COMPOSE_FILE_NEW_ORG=add_org/docker-compose-exportingEntityOrg.yaml
 # default image tag

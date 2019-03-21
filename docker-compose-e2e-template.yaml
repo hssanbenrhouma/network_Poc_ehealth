@@ -167,3 +167,42 @@ services:
       service: peer1.regulatororg.medical.com
     networks:
       - medical
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.providerorg.medical.com:7051
+      - CORE_PEER_LOCALMSPID=ProviderOrgMSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/peers/peer0.providerorg.medical.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/peers/peer0.providerorg.medical.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/peers/peer0.providerorg.medical.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/providerorg.medical.com/users/Admin@providerorg.medical.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./setupChannel:/opt/gopath/src/github.com/hyperledger/fabric/peer/setupChannel/
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+        - ./../../fabric-chaincode-evm:/opt/gopath/src/github.com/hyperledger/fabric-chaincode-evm
+
+    depends_on:
+      - orderer.medical.com
+      - peer0.providerorg.medical.com
+      - peer1.providerorg.medical.com
+      - peer0.pharmacyorg.medical.com
+      - peer1.pharmacyorg.medical.com
+      - peer0.hospitalorg.medical.com
+      - peer1.hospitalorg.medical.com
+      - peer0.regulatororg.medical.com
+      - peer1.regulatororg.medical.com
+    networks:
+      - medical
