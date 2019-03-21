@@ -1,0 +1,169 @@
+#
+# Copyright 2018 IBM All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+version: '2'
+
+volumes:
+  orderer.medical.com:
+  peer0.providerorg.medical.com:
+  peer0.pharmacyorg.medical.com:
+  peer0.hospitalorg.medical.com:
+  peer0.regulatororg.medical.com:
+  peer1.providerorg.medical.com:
+  peer1.pharmacyorg.medical.com:
+  peer1.hospitalorg.medical.com:
+  peer1.regulatororg.medical.com:
+networks:
+  medical:
+services:
+  provider-ca:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-providerorg
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.providerorg.medical.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4089fc00ea26332f13c6e1d960f6201b5d043fbcceb7ee87850bc70a5e49b6ea_sk
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.providerorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/4089fc00ea26332f13c6e1d960f6201b5d043fbcceb7ee87850bc70a5e49b6ea_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/providerorg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerProviderOrg
+    networks:
+      - medical
+
+  pharmacy-ca:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-pharmacyorg
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pharmacyorg.medical.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/5a741d6b17b870799fd843da906dd2940466d754f68ac9c704bf4c2127f32c2a_sk
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.pharmacyorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/5a741d6b17b870799fd843da906dd2940466d754f68ac9c704bf4c2127f32c2a_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/pharmacyorg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerPharmacyOrg
+    networks:
+      - medical
+
+  hospital-ca:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-hospitalorg
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospitalorg.medical.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8f810208b534014ade70c5daf6d7bb76e7f30936709f0b39f591920f592a5ce3_sk
+    ports:
+      - "9054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.hospitalorg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/8f810208b534014ade70c5daf6d7bb76e7f30936709f0b39f591920f592a5ce3_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/hospitalorg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerHospitalOrg
+    networks:
+      - medical
+
+  regulator-ca:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-regulatororg
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.regulatororg.medical.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/REGULATOR_CA_PRIVATE_KEY
+    ports:
+      - "10054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.regulatororg.medical.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/REGULATOR_CA_PRIVATE_KEY -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/regulatororg.medical.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerRegulatorOrg
+    networks:
+      - medical
+
+  orderer.medical.com:
+    extends:
+      file:   base/docker-compose-base.yaml
+      service: orderer.medical.com
+    container_name: orderer.medical.com
+    networks:
+      - medical
+
+  peer0.providerorg.medical.com:
+    container_name: peer0.providerorg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.providerorg.medical.com
+    networks:
+      - medical
+
+  peer1.providerorg.medical.com:
+    container_name: peer1.providerorg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.providerorg.medical.com
+    networks:
+      - medical
+
+  peer0.pharmacyorg.medical.com:
+    container_name: peer0.pharmacyorg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.pharmacyorg.medical.com
+    networks:
+      - medical
+
+  peer1.pharmacyorg.medical.com:
+    container_name: peer1.pharmacyorg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.pharmacyorg.medical.com
+    networks:
+      - medical
+
+  peer0.hospitalorg.medical.com:
+    container_name: peer0.hospitalorg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.hospitalorg.medical.com
+    networks:
+      - medical
+
+  peer1.hospitalorg.medical.com:
+    container_name: peer1.hospitalorg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.hospitalorg.medical.com
+    networks:
+      - medical
+  peer0.regulatororg.medical.com:
+    container_name: peer0.regulatororg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.regulatororg.medical.com
+    networks:
+      - medical
+
+  peer1.regulatororg.medical.com:
+    container_name: peer1.regulatororg.medical.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.regulatororg.medical.com
+    networks:
+      - medical
